@@ -1,0 +1,73 @@
+/* ========== 页面容器（与 pagecard.css 同构：同宽、同标题、同边距） ========== */
+.options{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:calc(100vh - 60px);
+  padding:24px max(16px,calc((100vw - 1040px)/2)) 72px;
+  background:#fff;}
+.options h1{
+  width:100%;
+  margin:0;
+  padding-bottom:20px;
+  border-bottom:1px solid #d9eafc;
+  text-align:left;
+  line-height:1.25;}
+
+/* ========== 分组与条目 ========== */
+.shelf{
+  width:100%;
+  max-width:500px;
+  padding:0;
+  margin-top:20px;}
+.shelf p{
+  color:#1b1b1b;
+  margin:0 0 14px;
+  padding-left:11px;
+  border-left:3px solid #2f9bff;
+  font-weight:600;
+  font-size:16px;
+  text-align:left;
+  line-height:1.4;}
+
+.itm,.shelf-note{
+  width:100%;
+  min-height:60px;
+  margin:0 0 10px;
+  padding:8px 12px;
+  border:1px solid #d9eafc;
+  border-radius:12px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  text-decoration:none;
+  transition:border-color .2s ease,background .2s ease,transform .2s ease;}
+.itm img,.shelf-note img{
+  width:26px;
+  height:26px;
+  margin:6px 12px 6px 4px;}
+.itm span,.shelf-note span{
+  color:#202528;
+  font-size:16px;}
+.itm:hover{
+  border-color:#2f9bff;
+  background:#f3f9ff;
+  transform:translateY(-2px);}
+.itm:focus-visible{
+  outline:2px solid #2f9bff;
+  outline-offset:2px;}
+
+@media (min-width:800px){
+  .options{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-content:start;
+    align-items:start;
+    gap:40px 56px;}
+  .options h1{grid-column:1/-1;}
+  .shelf{
+    width:100%;
+    max-width:none;
+    min-width:0;
+    margin-top:0;}
+}

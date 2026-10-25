@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "title": "一几一几复读机",
+      "desc": "只会重复打印“一几”的小玩意",
+      "icon": "./yiji-repeater/favicon.png",
+      "cover": "./yiji-repeater/cover.jpg",
+      "link": "./yiji-repeater/index.html"
+    }
+  ]
+}

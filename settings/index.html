@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Czealo States - 设置</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/_assets/style/common.css">
+<style>
+.eyebrow{
+  display:inline-block;
+  margin:0 auto 8px;
+  color:#2f9bff;
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;}
+.set-page{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:calc(100vh - 60px);
+  padding:20px 16px 0;
+  background:#fff;
+  text-align:center;}
+.set-page h1{margin:4px auto 10px;}
+.set-page h1::after{
+  content:"";
+  display:block;
+  width:56px;
+  height:4px;
+  margin:14px auto 0;
+  border-radius:4px;
+  background:linear-gradient(90deg,#4db3ff,#bfe3ff);}
+.set-list{
+  width:min(100%,640px);
+  margin:24px auto;
+  display:flex;
+  flex-direction:column;
+  gap:14px;}
+.set-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px 20px;
+  border:1px solid #d9eafc;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(31,80,140,.06);
+  text-align:left;}
+.set-row h3{margin:0;color:#202528;font-size:17px;}
+.set-row p{margin:4px 0 0;color:#5f6b7a;font-size:14px;text-align:left;line-height:1.5;}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:#c9d4e3;
+  transition:background .2s ease;
+  cursor:pointer;}
+.slider::before{
+  content:"";
+  position:absolute;
+  left:3px;top:3px;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  transition:transform .2s ease;}
+.switch input:checked + .slider{background:#2f9bff;}
+.switch input:checked + .slider::before{transform:translateX(20px);}
+.switch input:focus-visible + .slider{outline:2px solid #2f9bff;outline-offset:2px;}
+.reset{
+  align-self:center;
+  margin-top:8px;
+  padding:10px 26px;
+  border:1px solid #d9eafc;
+  border-radius:999px;
+  background:#fff;
+  color:#5f6b7a;
+  font-family:inherit;
+  font-size:inherit;
+  cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;}
+.reset:hover{border-color:#2f9bff;color:#2f9bff;}
+.set-note{color:#7d97ad;font-size:12px;margin:0 0 32px;}
+</style>
+</head>
+<body>
+<div class="set-page">
+  <p class="eyebrow">Settings</p>
+  <h1>设置</h1>
+  <div class="set-list">
+    <div class="set-row">
+      <div>
+        <h3>启动动画</h3>
+        <p>打开首页时的"系统初始化"开场动画</p>
+      </div>
+      <label class="switch"><input type="checkbox" id="opt-boot"><span class="slider"></span></label>
+    </div>
+    <div class="set-row">
+      <div>
+        <h3>首页背景视频</h3>
+        <p>关闭后首页改用图片背景，更省流量</p>
+      </div>
+      <label class="switch"><input type="checkbox" id="opt-bg"><span class="slider"></span></label>
+    </div>
+    <div class="set-row">
+      <div>
+        <h3>页面动效</h3>
+        <p>滚动显现、漂浮图标等动画效果</p>
+      </div>
+      <label class="switch"><input type="checkbox" id="opt-anim"><span class="slider"></span></label>
+    </div>
+    <button class="reset" id="opt-reset">恢复默认设置</button>
+  </div>
+  <p class="set-note">设置仅保存在你的浏览器中</p>
+</div>
+
+<script>
+(function () {
+  var boot = document.getElementById('opt-boot');
+  var bg = document.getElementById('opt-bg');
+  var anim = document.getElementById('opt-anim');
+  boot.checked = localStorage.getItem('czealo_no_boot') !== '1';
+  bg.checked = localStorage.getItem('czealo_bg_static') !== '1';
+  anim.checked = localStorage.getItem('czealo_no_anim') !== '1';
+  boot.addEventListener('change', function () {
+    if (boot.checked) localStorage.removeItem('czealo_no_boot');
+    else localStorage.setItem('czealo_no_boot', '1');
+  });
+  bg.addEventListener('change', function () {
+    if (bg.checked) localStorage.removeItem('czealo_bg_static');
+    else localStorage.setItem('czealo_bg_static', '1');
+  });
+  anim.addEventListener('change', function () {
+    if (anim.checked) localStorage.removeItem('czealo_no_anim');
+    else localStorage.setItem('czealo_no_anim', '1');
+  });
+  document.getElementById('opt-reset').addEventListener('click', function () {
+    localStorage.removeItem('czealo_no_boot');
+    localStorage.removeItem('czealo_bg_static');
+    localStorage.removeItem('czealo_no_anim');
+    location.reload();
+  });
+})();
+</script>
+<script src="/_assets/script/footer.js"></script>
+<script src="/_assets/navbar/nav.js"></script>
+</body>
+</html>

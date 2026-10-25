@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snake</title>
+<link rel="stylesheet" href="./style.css">
+<link rel="icon" type="image/png" href="/favicon.png">
+</head>
+<body>
+  <div class="hud">
+    <span>SCORE <b id="score">0</b></span>
+    <span>BEST <b id="best"></b></span>
+  </div>
+  <canvas id="game" width="480" height="480"></canvas>
+  <div class="touch-controls" aria-label="游戏控制">
+    <button type="button" class="control up" data-dir="up" aria-label="向上">↑</button>
+    <button type="button" class="control left" data-dir="left" aria-label="向左">←</button>
+    <button type="button" class="control down" data-dir="down" aria-label="向下">↓</button>
+    <button type="button" class="control right" data-dir="right" aria-label="向右">→</button>
+    <button type="button" class="pause" data-action="pause" aria-label="暂停或继续">⏸</button>
+  </div>
+  <p class="tip">WASD 控制移动，空格暂停</p>
+<script src="./main.js" defer></script>
+</body>
+</html>

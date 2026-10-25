@@ -1,0 +1,129 @@
+/* ============================================================
+   CZEncoder — 黑框终端（无窗口，只剩终端）
+   黑底 · 荧光绿 · 等宽字体 · 提示符内联输入
+   ============================================================ */
+
+:root{
+  --text:#e6e6e6;
+  --muted:#8f8f8f;
+  --dim:#666;
+  --green:#33ff33;
+  --red:#ff5555;
+  --mono:'Ubuntu Mono','Cascadia Mono','JetBrains Mono','DejaVu Sans Mono','Consolas','Courier New',monospace;}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  scrollbar-width:none;
+  -ms-overflow-style:none;}
+*::-webkit-scrollbar{display:none;}
+::selection{background:var(--green);color:#000;}
+
+body,input,textarea,select{
+  font-family:var(--mono);
+  color:var(--text);}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:14px;
+  gap:12px;
+  background:#000;}
+
+/* ---------- 站点导航栏暗色化（覆盖运行时注入的 navbar/style.css） ---------- */
+body .navbar{background:#000;border-bottom:1px solid #1c1c1c;}
+body .navbar a,body .navbar .rg .菜单按钮{color:var(--text);}
+body .navbar.over-page{background:rgba(0,0,0,.82);border-bottom-color:transparent;}
+body .navbar.over-page a,body .navbar.over-page .rg .菜单按钮{color:var(--text);text-shadow:none;}
+body .菜单按钮:hover{background:rgba(255,255,255,.08);}
+body .navlist{background:#0a0a0a;box-shadow:-2px 0 12px rgba(0,0,0,.6);}
+body .大标志{background:#0a0a0a;border-bottom:1px solid #1c1c1c;}
+body .大标志 h1{color:var(--text);}
+body .navlist .list a{color:var(--text);}
+body .navlist .list a:hover{background:#1c1c1c;}
+body .list a.锁了{background:var(--green);color:#000;}
+body .sl{background:#1c1c1c;}
+body .cover{background:rgba(0,0,0,.6);}
+body .fake-bar,body .fake-bar:hover,body .fake-bar.is-dragging{background:rgba(51,255,51,.45);}
+
+/* ---------- 终端 ---------- */
+.terminal{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  min-height:calc(100vh - 130px);
+  background:#000;}
+.term-out{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:14px 18px;
+  font-size:14px;
+  line-height:1.55;
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);}
+.line{
+  color:var(--text);
+  white-space:pre-wrap;
+  word-break:break-all;}
+.line.cmd{
+  display:flex;
+  align-items:baseline;
+  gap:0;
+  white-space:nowrap;}
+.line .ps1,.ps1{
+  color:var(--green);
+  white-space:pre;
+  text-shadow:0 0 8px rgba(51,255,51,.5);}
+.line.ok{
+  color:var(--green);
+  text-shadow:0 0 8px rgba(51,255,51,.35);}
+.line.err{color:var(--red);}
+.line.info{color:var(--muted);}
+.line.hl{color:var(--green);}
+.line.cmd .ps1{flex-shrink:0;}
+#cmdInput{
+  flex:1;
+  min-width:0;
+  padding:0;
+  border:none;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-size:14px;
+  outline:none;
+  caret-color:var(--green);}
+
+/* ---------- 隐藏的功能层（文件/密钥/状态等） ---------- */
+.hidden-layer{display:none;}
+
+/* ---------- 站点页脚暗色化（footer.js 注入） ---------- */
+.footer{
+  border-top:1px solid #1c1c1c;
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:6px 0 0;}
+.footer a{color:var(--muted);text-decoration:none;}
+.copyr{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+  font-size:12px;
+  margin:20px 0 15px;
+  color:var(--muted);}
+.copyr a{color:var(--muted);text-decoration:underline;}
+
+/* ---------- 小屏 ---------- */
+@media (max-width:400px){
+  body{padding:10px 8px;}
+  .term-out{padding:10px 12px;font-size:13px;}
+  #cmdInput{font-size:13px;}
+}

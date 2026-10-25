@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#eef6ff">
+<meta name="description" content="Czealo States —— 一个偏创作、偏娱乐的个人站点：本地小游戏、实用工具与各种杂七杂八的东西。">
+<meta name="author" content="Czealo">
+<meta property="og:site_name" content="Czealo States">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Czealo States - 个人创作、游戏与工具">
+<meta property="og:description" content="一个偏创作、偏娱乐的个人站点，这里有小游戏、工具与一些杂七杂八的东西。">
+<meta property="og:locale" content="zh_CN">
+<title>Czealo States - 个人创作、游戏与工具</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="dns-prefetch" href="https://font.kivo.wiki">
+<link rel="preconnect" href="https://font.kivo.wiki" crossorigin>
+<link rel="preload" as="image" href="/_assets/gallery/bg.jpg" fetchpriority="high">
+<link rel="stylesheet" href="/_assets/style/common.css">
+<link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<!-- 背景：移动端显示图片，桌面端播放视频 -->
+<div class="bg" aria-hidden="true"></div>
+<script>
+(function () {
+  var background = document.querySelector('.bg');
+  if (!background) return;
+
+  // 背景高度实时撑满视口高度
+  var viewport = window.visualViewport;
+  var updateBackgroundHeight = function () {
+    background.style.height = (viewport ? viewport.height : window.innerHeight) + 'px';
+  };
+  updateBackgroundHeight();
+  window.addEventListener('resize', updateBackgroundHeight);
+  if (viewport) viewport.addEventListener('resize', updateBackgroundHeight);
+
+  // 手机 / 触屏设备使用图片背景，桌面端使用视频背景（设置页可强制图片）
+  var isMobile = localStorage.getItem('czealo_bg_static') === '1'
+    || /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|HuaweiBrowser/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))
+    || window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  background.replaceChildren();
+
+  if (isMobile) {
+    var img = document.createElement('img');
+    img.src = '/_assets/gallery/bg.jpg';
+    img.alt = '';
+    background.appendChild(img);
+    return;
+  }
+
+  var video = document.createElement('video');
+  video.autoplay = true;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.setAttribute('controlslist', 'nodownload');
+  video.draggable = false;
+  video.poster = '/_assets/gallery/bg.jpg';
+  video.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  var source = document.createElement('source');
+  source.src = '/_assets/gallery/bg.mp4';
+  source.type = 'video/mp4';
+  video.appendChild(source);
+  background.appendChild(video);
+  video.play().catch(function () {});
+})();
+</script>
+
+<main id="main">
+<section class="page hero">
+  <div class="gunmu">
+    <p class="eyebrow">Creative · Games · Tools</p>
+    <h1>Czealo States</h1>
+    <p class="lead">一个偏创作、偏娱乐的个人站点<br>这里有小游戏、工具与一些杂七杂八的东西</p>
+    <div class="actions">
+      <a class="transbtn" href="nav.html">浏览所有选项</a>
+      <a class="go" href="/games/index.html">直接浏览游戏 →</a>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"></div>
+</section>
+
+<section class="page2" id="cards">
+  <div class="inner">
+    <p class="eyebrow">Choose your direction</p>
+    <h2 id="categories">想先看什么？</h2>
+    <p class="lead">挑选一个你感兴趣的方向，直接开始逛</p>
+    <div class="cards">
+      <a class="card reveal" href="games/index.html" target="_blank" rel="noopener noreferrer">
+        <img src="/_assets/icons/controller.svg" alt="" loading="lazy" decoding="async">
+        <h3>游戏</h3>
+        <p>本地运行，小游戏与互动体验</p>
+        <span class="action">看看游戏 →</span>
+      </a>
+      <a class="card reveal" style="--d:.12s" href="contrap/index.html" target="_blank" rel="noopener noreferrer">
+        <img src="/_assets/icons/clover.svg" alt="" loading="lazy" decoding="async">
+        <h3>妙物</h3>
+        <p>不好归类，或许能让你会心一笑</p>
+        <span class="action">随便逛逛 →</span>
+      </a>
+      <a class="card reveal" style="--d:.24s" href="tools/index.html" target="_blank" rel="noopener noreferrer">
+        <img src="/_assets/icons/spanner.svg" alt="" loading="lazy" decoding="async">
+        <h3>工具</h3>
+        <p>本地、安全的工具，打开即用</p>
+        <span class="action">打开工具 →</span>
+      </a>
+    </div>
+    <a href="/nav.html" class="go reveal">显示所有选项 →</a>
+  </div>
+</section>
+
+<section class="page2" id="desx">
+  <p class="eyebrow">What's special here</p>
+  <h2>Czealo States 特色都有啥?</h2>
+  <div id="descs">
+    <div class="desc reveal">
+      <img src="/_assets/icons/clock.svg" alt="" loading="lazy" decoding="async">
+      <h3>懒得更新</h3>
+      <p>不就是没灵感而已<br>上次打开是什么时候来着</p>
+    </div>
+    <div class="desc reveal" style="--d:.12s">
+      <img src="/_assets/icons/userblock.svg" alt="" loading="lazy" decoding="async">
+      <h3>无人访问</h3>
+      <p>整个页面静悄悄的<br>甚至都无人愿意访问</p>
+    </div>
+    <div class="desc reveal" style="--d:.24s">
+      <img src="/_assets/icons/usd.svg" alt="" loading="lazy" decoding="async">
+      <h3>完全免费</h3>
+      <p>虽然网站很垃圾<br>但是免费的要什么自行车</p>
+    </div>
+  </div>
+</section>
+
+<section class="page2" id="cta">
+  <h2>常回来看看</h2>
+  <p class="lead">虽然大概率还是这些内容<br>但万一哪天真的更新了呢</p>
+  <div class="actions">
+    <a class="transbtn" href="nav.html">浏览所有选项</a>
+    <a class="go" href="#">回到顶部</a>
+  </div>
+</section>
+</main>
+
+<script src="/_assets/script/boot_anim.js"></script>
+<script src="/_assets/script/footer.js"></script>
+<script src="/_assets/navbar/nav.js"></script>
+<script>
+// 区块滚动显现；不支持或偏好减少动效时直接显示
+(function () {
+  var items = document.querySelectorAll('.reveal');
+  if (!items.length) return;
+  document.documentElement.classList.add('js-reveal');
+  if (!('IntersectionObserver' in window)
+      || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || localStorage.getItem('czealo_no_anim') === '1') {
+    document.documentElement.classList.add('no-anim');
+    items.forEach(function (el) { el.classList.add('in'); });
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  items.forEach(function (el) { observer.observe(el); });
+})();
+</script>
+</body>
+</html>

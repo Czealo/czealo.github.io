@@ -1,0 +1,646 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ナデナデゲーム</title>
+<link rel="icon" type="image/png" href="./favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+if (localStorage.getItem('nadenade_external_cdn') !== 'false') {
+  import('https://cdn.jsdelivr.net/npm/ba-click-fx@1.3.1/dist/ba-click-fx.js')
+    .then(function(module) { new module.BAClickFX(); })
+    .catch(function(error) { console.warn('点击特效加载失败:', error); });
+}
+</script>
+
+<div id="err-ov">
+<div class="err-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><path d="M 50,8 L 92,87 Q 94,90 91,90 L 9,90 Q 6,90 8,87 Z" fill="black"/><rect x="46" y="30" width="8" height="35" fill="white" rx="2"/><circle cx="50" cy="78" r="5" fill="white"/></svg></div>
+<div class="err-title">データ読み込みエラー</div>
+<div class="err-sub">角色資料載入失敗，無法啟動遊戲。</div>
+<button class="err-btn" onclick="location.reload()">重試</button>
+</div>
+
+<div id="mdl-bd" class="mdl-bd" onclick="closeMenuOnBackdrop(event)">
+<div class="mdl-card">
+<div class="mdl-hdr">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#438bd0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+</svg>
+<span class="mdl-title">遊戲設定</span>
+<button class="mdl-close" onclick="closeMenu()" aria-label="关闭">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+</svg>
+</button>
+</div>
+<div class="mdl-body">
+<div class="set-item">
+<span class="pause-label">遊戲控制</span>
+<button id="pause-btn" class="btn-pause" onclick="togglePause()" aria-label="暂停/继续">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<rect x="6" y="4" width="4" height="16" rx="1"></rect>
+<rect x="14" y="4" width="4" height="16" rx="1"></rect>
+</svg>
+</button>
+</div>
+
+<div class="set-item mt-8">
+<label for="lang-select" class="lbl">台詞語言</label>
+<select id="lang-select" class="sel" onchange="onLangSelect(this.value)">
+<option value="zh">中文（正體）</option>
+<option value="jp">日本語</option>
+</select>
+</div>
+
+<div class="set-item mt-8">
+<label class="toggle-row" for="external-cdn-toggle">
+<span>允許載入 BA 點擊</span>
+<span class="toggle-switch">
+<input id="external-cdn-toggle" type="checkbox" onchange="onExternalCdnToggle(this.checked)">
+<span class="toggle-track" aria-hidden="true"></span>
+</span>
+</label>
+</div>
+
+<div class="set-item mt-8">
+<label class="toggle-row" for="levelup-sound-toggle">
+<span>角色升級音效</span>
+<span class="toggle-switch">
+<input id="levelup-sound-toggle" type="checkbox" onchange="onLevelUpSoundToggle(this.checked)">
+<span class="toggle-track" aria-hidden="true"></span>
+</span>
+</label>
+</div>
+
+<div class="set-item mt-8">
+<label for="college-select" class="lbl">切換角色</label>
+<select id="college-select" class="sel" onchange="onCollegeSelect(this.value)">
+</select>
+</div>
+<div class="btn-row">
+<button class="arr" onclick="switchChar(-1)">
+<img src="./icons/l.svg">
+</button>
+<button class="name-btn" id="char-name-display">
+<span id="char-name-text">選擇角色</span>
+</button>
+<button class="arr" onclick="switchChar(1)">
+<img src="./icons/r.svg">
+</button>
+</div>
+<div id="char-counter" class="cnt"></div>
+</div>
+
+<div class="save-section">
+<div class="lbl">檔案管理</div>
+<div class="save-actions">
+<button id="export-btn" class="btn-pause" onclick="exportSave()" style="background:#55aee8;">匯出存檔</button>
+<button id="import-btn" class="btn-pause" onclick="document.getElementById('import-file').click()" style="background:#55aee8;">匯入存檔</button>
+</div>
+<input type="file" id="import-file" style="display:none;" onchange="importSave(event)">
+</div>
+</div>
+</div>
+</div>
+
+<div class="boot-scr">
+<div class="boot-logo">ナデナデゲーム</div>
+<div class="boot-txt" id="boot-text">System initializing...</div>
+<div class="boot-bar">
+<div class="boot-bar-inner" id="boot-progress-bar"></div>
+</div>
+</div>
+
+<div class="app">
+<button id="menu-btn" class="menu-btn" onclick="openMenu()" aria-label="选单">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#55aee8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<line x1="4" y1="21" x2="4" y2="14"></line>
+<line x1="4" y1="10" x2="4" y2="3"></line>
+<line x1="12" y1="21" x2="12" y2="12"></line>
+<line x1="12" y1="8" x2="12" y2="3"></line>
+<line x1="20" y1="21" x2="20" y2="16"></line>
+<line x1="20" y1="12" x2="20" y2="3"></line>
+<line x1="1" y1="14" x2="7" y2="14"></line>
+<line x1="9" y1="8" x2="15" y2="8"></line>
+<line x1="17" y1="16" x2="23" y2="16"></line>
+</svg>
+</button>
+
+<div class="logo">CZEALO STATES</div>
+<div class="sub">NADENADE SYSTEM</div>
+
+<div id="char" class="char">
+<img id="char-img" src="" alt="character">
+</div>
+
+<div id="pause-ov" class="pause-ov" aria-hidden="true">
+<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#438bd0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<rect x="6" y="4" width="4" height="16" rx="1"></rect>
+<rect x="14" y="4" width="4" height="16" rx="1"></rect>
+</svg>
+</div>
+
+<div id="name" class="name"></div>
+<div id="msg" class="dlg"></div>
+<div class="bar"><div id="fill" class="fill"></div></div>
+<div class="stats">好感度等級 <span id="lvl" style="color:#55aee8;font-weight:bold;">1</span>　累計摸頭數 <span id="count" style="color:#55aee8;font-weight:bold;">0</span></div>
+</div>
+
+<script src="/_assets/script/czencoder/czencoder.js"></script>
+<script>
+let colleges = [];
+let allStudents = [];
+let currentCollegeIndex = 0;
+let currentCharIndex = 0;
+let charData = null;
+let count = 0, exp = 0, lvl = 1;
+let isPaused = false;
+let touchTimer = null;
+let lastClickTime = 0;
+let currentLang = 'jp';
+let langData = {};
+let defaultMsg = '';
+
+const charEl = document.getElementById("char");
+const charImg = document.getElementById("char-img");
+const nameEl = document.getElementById("name");
+const msgEl = document.getElementById("msg");
+const fillEl = document.getElementById("fill");
+const lvlEl = document.getElementById("lvl");
+const countEl = document.getElementById("count");
+const collegeSelect = document.getElementById("college-select");
+const langSelect = document.getElementById("lang-select");
+const externalCdnToggle = document.getElementById("external-cdn-toggle");
+const levelUpSoundToggle = document.getElementById("levelup-sound-toggle");
+const charNameText = document.getElementById("char-name-text");
+const charCounter = document.getElementById("char-counter");
+let isLevelUpSoundEnabled = localStorage.getItem('nadenade_levelup_sound') !== 'false';
+
+externalCdnToggle.checked = localStorage.getItem('nadenade_external_cdn') !== 'false';
+levelUpSoundToggle.checked = isLevelUpSoundEnabled;
+
+function onExternalCdnToggle(enabled) {
+if (!window.confirm('確定要' + (enabled ? '允許' : '停止') + '載入 BA 點擊外部程式嗎？頁面將重新載入。')) {
+externalCdnToggle.checked = localStorage.getItem('nadenade_external_cdn') !== 'false';
+return;
+}
+localStorage.setItem('nadenade_external_cdn', enabled);
+location.reload();
+}
+
+function onLevelUpSoundToggle(enabled) {
+isLevelUpSoundEnabled = enabled;
+localStorage.setItem('nadenade_levelup_sound', enabled);
+}
+
+function getCurrentStudents() {
+return colleges[currentCollegeIndex]?.students || [];
+}
+
+function updateCharNameDisplay() {
+if (charData) {
+const students = getCurrentStudents();
+const total = students.length;
+const current = currentCharIndex + 1;
+charNameText.textContent = charData.name;
+charCounter.textContent = total > 0 ? current + ' / ' + total : '';
+} else {
+charNameText.textContent = "選擇角色";
+charCounter.textContent = '';
+}
+}
+
+function getLangFileName(lang) {
+return './data/' + lang + '.json';
+}
+
+async function loadLangData(lang) {
+try {
+const response = await fetch(getLangFileName(lang));
+if (!response.ok) throw new Error('HTTP ' + response.status);
+const data = await response.json();
+if (!data.college || !Array.isArray(data.college) || data.college.length === 0) {
+throw new Error('JSON 格式錯誤：缺少 college 陣列或為空');
+}
+if (!data.defaultMsg) {
+data.defaultMsg = '「あれ？」';
+}
+langData[lang] = data;
+return true;
+} catch (e) {
+console.error(lang + ' 載入失敗:', e);
+return false;
+}}
+
+async function loadAllLangs() {
+const langs = ['jp', 'zh'];
+for (var i = 0; i < langs.length; i++) {
+var success = await loadLangData(langs[i]);
+if (!success) {
+showError(langs[i] + ' 語言檔案載入失敗');
+return false;
+}}
+return true;
+}
+
+function switchLang(lang) {
+currentLang = lang;
+var data = langData[lang];
+if (!data) return;
+defaultMsg = data.defaultMsg || '「あれ？」';
+colleges = data.college;
+allStudents = [];
+colleges.forEach(function(college) {
+college.students.forEach(function(student) {
+allStudents.push(student);
+});
+});
+populateCollegeSelect();
+if (colleges.length > 0 && colleges[0].students.length > 0) {
+currentCollegeIndex = 0;
+currentCharIndex = 0;
+charData = colleges[0].students[0];
+loadSave();
+charImg.src = charData.src;
+nameEl.textContent = charData.name;
+updateUI();
+collegeSelect.value = currentCollegeIndex;
+updateCharNameDisplay();
+msgEl.textContent = defaultMsg;
+} else {
+charData = null;
+charImg.src = "";
+nameEl.textContent = "";
+updateUI();
+updateCharNameDisplay();
+}
+localStorage.setItem('schale_lang', lang);
+}
+
+function onLangSelect(value) {
+if (isPaused) {
+langSelect.value = currentLang;
+return;
+}
+switchLang(value);
+langSelect.value = currentLang;
+}
+
+async function loadCharacterData() {
+try {
+var success = await loadAllLangs();
+if (!success) return false;
+var savedLang = localStorage.getItem('schale_lang') || 'jp';
+switchLang(savedLang);
+return true;
+} catch (e) {
+console.error('載入失敗:', e);
+showError(e.message);
+return false;
+}}
+
+function populateCollegeSelect() {
+collegeSelect.innerHTML = '';
+colleges.forEach(function(college, index) {
+var option = document.createElement('option');
+option.value = index;
+option.textContent = college.name;
+collegeSelect.appendChild(option);
+});
+}
+
+function onCollegeSelect(value) {
+if (value === '') return;
+if (isPaused) {
+collegeSelect.value = currentCollegeIndex;
+return;
+}
+var index = parseInt(value);
+if (index === currentCollegeIndex) return;
+currentCollegeIndex = index;
+var students = getCurrentStudents();
+if (students.length > 0) {
+currentCharIndex = 0;
+charData = students[0];
+loadSave();
+charImg.src = charData.src;
+nameEl.textContent = charData.name;
+updateUI();
+msgEl.textContent = defaultMsg;
+updateCharNameDisplay();
+} else {
+charData = null;
+charImg.src = "";
+nameEl.textContent = "";
+updateUI();
+updateCharNameDisplay();
+}
+collegeSelect.value = currentCollegeIndex;
+}
+
+function switchChar(direction) {
+if (!charData) return;
+if (isPaused) return;
+if (touchTimer) {
+clearTimeout(touchTimer);
+touchTimer = null;
+charEl.classList.remove("touch");
+}
+var students = getCurrentStudents();
+if (students.length === 0) return;
+currentCharIndex = (currentCharIndex + direction + students.length) % students.length;
+charData = students[currentCharIndex];
+loadSave();
+charImg.src = charData.src;
+nameEl.textContent = charData.name;
+updateUI();
+msgEl.textContent = defaultMsg;
+updateCharNameDisplay();
+}
+
+function showError(msg) {
+var overlay = document.getElementById('err-ov');
+var detailEl = document.getElementById('err-dtl');
+overlay.classList.add('show');
+detailEl.innerHTML = '請檢查語言檔案是否存在且格式正確。<br><br>錯誤詳情：' + msg;
+document.querySelector('.boot-scr').classList.add('hidden');
+document.querySelector('.app').classList.add('hidden');
+}
+
+function togglePause() {
+isPaused = !isPaused;
+var pauseBtn = document.getElementById("pause-btn");
+var appEl = document.querySelector(".app");
+var pauseOverlay = document.getElementById("pause-ov");
+if (isPaused) {
+pauseBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+pauseBtn.classList.add("paused");
+appEl.classList.add("is-paused");
+pauseOverlay.setAttribute("aria-hidden", "false");
+} else {
+pauseOverlay.setAttribute("aria-hidden", "true");
+pauseBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>';
+pauseBtn.classList.remove("paused");
+appEl.classList.remove("is-paused");
+}}
+
+function openMenu() {
+document.getElementById("mdl-bd").classList.add("show");
+if (charData) {
+collegeSelect.value = currentCollegeIndex;
+}
+}
+
+function closeMenu() {
+document.getElementById("mdl-bd").classList.remove("show");
+}
+
+function closeMenuOnBackdrop(e) {
+if (e.target.id === "mdl-bd") {
+closeMenu();
+}}
+
+function getMaxExp(level) {
+return 100 + (level - 1) * 50;
+}
+
+function updateUI() {
+if (!charData) return;
+nameEl.textContent = charData.name;
+lvlEl.textContent = lvl;
+countEl.textContent = count;
+var currentMaxExp = getMaxExp(lvl);
+var percentage = Math.min((exp / currentMaxExp) * 100, 100);
+fillEl.style.width = percentage + "%";
+}
+
+function getSaveKey(id) {
+return id === "aris" ? "schale_aris_save" : "schale_save_" + id;
+}
+
+function saveData() {
+localStorage.setItem(getSaveKey(charData.id), JSON.stringify({
+lvl: lvl,
+count: count,
+exp: exp
+}));
+}
+
+function loadSave() {
+lvl = 1;
+count = 0;
+exp = 0;
+var key = getSaveKey(charData.id);
+var saved = localStorage.getItem(key);
+if (saved) {
+try {
+var data = JSON.parse(saved);
+lvl = data.lvl || 1;
+count = data.count || 0;
+exp = data.exp || 0;
+} catch (e) {
+console.error("存檔讀取失敗:", e);
+}}}
+
+async function exportSave() {
+try {
+var allSaves = {};
+for (var i = 0; i < allStudents.length; i++) {
+var student = allStudents[i];
+var key = getSaveKey(student.id);
+var data = localStorage.getItem(key);
+if (data) {
+allSaves[key] = JSON.parse(data);
+}}
+var jsonStr = JSON.stringify(allSaves);
+var encoder = new CZEncoder("Czealo");
+await encoder.init();
+var textEncoder = new TextEncoder();
+var bytes = textEncoder.encode(jsonStr);
+var encrypted = await encoder.encodeBytes(bytes);
+var blob = new Blob([encrypted], { type: 'application/octet-stream' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = 'save_' + new Date().toISOString().slice(0,10) + '.cz';
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+msgEl.textContent = "存檔已匯出";
+} catch (e) {
+console.error(e);
+msgEl.textContent = "匯出失敗: " + e.message;
+}}
+
+async function importSave(event) {
+var file = event.target.files[0];
+if (!file) return;
+try {
+var arrayBuffer = await file.arrayBuffer();
+var bytes = new Uint8Array(arrayBuffer);
+var encoder = new CZEncoder("Czealo");
+await encoder.init();
+var decrypted = await encoder.decodeBytes(bytes);
+var textDecoder = new TextDecoder();
+var jsonStr = textDecoder.decode(decrypted);
+var allSaves = JSON.parse(jsonStr);
+var imported = 0;
+for (var key in allSaves) {
+if (allSaves.hasOwnProperty(key)) {
+localStorage.setItem(key, JSON.stringify(allSaves[key]));
+imported++;
+}}
+if (charData) {
+loadSave();
+updateUI();}
+msgEl.textContent = "匯入了 " + imported + " 個角色的存檔";
+} catch (e) {
+console.error(e);
+msgEl.textContent = "匯入失敗: " + e.message;}
+event.target.value = '';}
+
+function initGame() {
+if (!colleges.length) return;
+var students = getCurrentStudents();
+if (!students.length) return;
+currentCollegeIndex = 0;
+currentCharIndex = 0;
+charData = students[0];
+loadSave();
+charImg.src = charData.src;
+nameEl.textContent = charData.name;
+updateUI();
+collegeSelect.value = currentCollegeIndex;
+updateCharNameDisplay();
+msgEl.textContent = defaultMsg;
+langSelect.value = currentLang;
+
+const alphaCanvas = document.createElement('canvas');
+const alphaContext = alphaCanvas.getContext('2d', { willReadFrequently: true });
+const alphaMasks = new Map();
+
+function isOpaqueCharacterPixel(event) {
+if (!alphaContext || !charImg.complete || !charImg.naturalWidth || !charImg.naturalHeight) return false;
+
+var bounds = charEl.getBoundingClientRect();
+var layoutWidth = charEl.offsetWidth;
+var layoutHeight = charEl.offsetHeight;
+if (!layoutWidth || !layoutHeight || !bounds.width || !bounds.height) return false;
+
+var localX = (event.clientX - bounds.left) / (bounds.width / layoutWidth);
+var localY = (event.clientY - bounds.top) / (bounds.height / layoutHeight);
+var fitScale = Math.min(charEl.clientWidth / charImg.naturalWidth, charEl.clientHeight / charImg.naturalHeight);
+var imageLeft = (charEl.clientWidth - charImg.naturalWidth * fitScale) / 2;
+var imageTop = (charEl.clientHeight - charImg.naturalHeight * fitScale) / 2;
+var pixelX = Math.floor((localX - imageLeft) / fitScale);
+var pixelY = Math.floor((localY - imageTop) / fitScale);
+
+if (pixelX < 0 || pixelY < 0 || pixelX >= charImg.naturalWidth || pixelY >= charImg.naturalHeight) return false;
+
+var imageKey = charImg.currentSrc || charImg.src;
+var alphaMask = alphaMasks.get(imageKey);
+if (!alphaMask) {
+try {
+alphaCanvas.width = charImg.naturalWidth;
+alphaCanvas.height = charImg.naturalHeight;
+alphaContext.drawImage(charImg, 0, 0);
+var imagePixels = alphaContext.getImageData(0, 0, alphaCanvas.width, alphaCanvas.height).data;
+alphaMask = new Uint8Array(charImg.naturalWidth * charImg.naturalHeight);
+for (var pixelIndex = 0; pixelIndex < alphaMask.length; pixelIndex++) {
+alphaMask[pixelIndex] = imagePixels[pixelIndex * 4 + 3];
+}
+if (alphaMasks.size >= 4) alphaMasks.delete(alphaMasks.keys().next().value);
+alphaMasks.set(imageKey, alphaMask);
+} catch (error) {
+console.warn('角色透明度检测失败:', error);
+return false;
+}}
+
+return alphaMask[pixelY * charImg.naturalWidth + pixelX] > 0;
+}
+
+charEl.onpointermove = function(event) {
+charEl.classList.toggle("transparent-hover", !isOpaqueCharacterPixel(event));
+};
+charEl.onpointerleave = function() {
+charEl.classList.remove("transparent-hover");
+};
+
+charEl.onclick = function(event) {
+if (isPaused || !charData || !isOpaqueCharacterPixel(event)) return;
+var now = Date.now();
+if (now - lastClickTime < 50) return;
+lastClickTime = now;
+
+count++;
+exp += 20;
+var currentMaxExp = getMaxExp(lvl);
+var levelUp = false;
+
+if (exp >= currentMaxExp) {
+exp -= currentMaxExp;
+lvl++;
+levelUp = true;
+if (isLevelUpSoundEnabled) {
+var soundPath = 'sounds/' + charData.id + '.ogg';
+var audio = new Audio(soundPath);
+audio.play().catch(function() {});
+}
+}
+
+if (touchTimer) {
+clearTimeout(touchTimer);}
+charEl.classList.remove("touch");
+void charEl.offsetWidth;
+charEl.classList.add("touch");
+charImg.src = charData.touchSrc;
+touchTimer = setTimeout(function() {
+charEl.classList.remove("touch");
+charImg.src = charData.src;
+touchTimer = null;
+}, 300);
+if (levelUp) {
+msgEl.textContent = "「" + charData.levelUpMsg + "」";
+} else {
+msgEl.textContent = "「" + charData.msgs[Math.floor(Math.random() * charData.msgs.length)] + "」";
+}
+saveData();
+updateUI();
+};}
+
+var bootText = document.getElementById("boot-text");
+var bootProgressBar = document.getElementById("boot-progress-bar");
+var bootScreen = document.querySelector(".boot-scr");
+
+bootProgressBar.style.width = "30%";
+bootText.textContent = "Connecting to Czealo network...";
+setTimeout(function() {
+bootProgressBar.style.width = "60%";
+bootText.textContent = "Processing your request, please wait...";
+}, 300);
+setTimeout(function() {
+bootProgressBar.style.width = "100%";
+bootText.textContent = "Welcome back, Sensei.";
+}, 600);
+setTimeout(function() {
+bootScreen.style.opacity = "0";
+bootScreen.style.visibility = "hidden";
+document.body.classList.add("ready");
+setTimeout(function() { bootScreen.remove(); }, 400);
+}, 1000);
+
+(async function main() {
+var success = await loadCharacterData();
+if (success) {
+initGame();
+}})();
+</script>
+</body>
+</html>

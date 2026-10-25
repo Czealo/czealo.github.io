@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "title": "ナデナデゲーム",
+      "desc": "《Blue Archive》学生摸头游戏",
+      "icon": "./nadenade-game/favicon.png",
+      "cover": "./nadenade-game/cover.jpg",
+      "link": "./nadenade-game/index.html"
+    },
+    {
+      "title": "贪吃蛇",
+      "desc": "经典小游戏，站长半夜无聊写的",
+      "icon": "./snake/icon.svg",
+      "cover": "./snake/cover.svg",
+      "link": "./snake/index.html"
+    }
+  ]
+}

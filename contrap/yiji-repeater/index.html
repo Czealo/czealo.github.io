@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>一几一几复读机</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="/_assets/style/common.css">
+<link rel="stylesheet" href="style.css">
+<style>
+#avatarWrapper {
+position: fixed;
+z-index: 9999;
+pointer-events: none;
+left: 20px;
+bottom: 20px;
+display: flex;
+align-items: flex-end;
+gap: 8px;}
+
+#flyingAvatar {
+width: 80px;
+height: 80px;
+border-radius: 50%;
+object-fit: cover;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+display: block;
+pointer-events: auto;
+cursor: pointer;
+flex-shrink: 0;
+order: 0;}
+
+#speechBubble {
+position: relative;
+background: #1e293b;
+color: #fff;
+padding: 6px 14px;
+border-radius: 12px 12px 4px 12px;
+font-size: 14px;
+max-width: 200px;
+word-break: break-word;
+text-align: center;
+opacity: 0;
+transition: opacity 0.3s ease;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+pointer-events: none;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+writing-mode: horizontal-tb;
+letter-spacing: normal;
+line-height: 1.5;
+order: 1;}
+
+#speechBubble::after {
+content: '';
+position: absolute;
+left: -6px;
+top: 50%;
+transform: translateY(-50%) rotate(45deg);
+width: 10px;
+height: 10px;
+background: #1e293b;
+border-radius: 2px;}
+
+@media (max-width: 480px) {
+#avatarWrapper {
+left: 6px !important;
+bottom: 6px !important;
+gap: 4px;}
+
+#flyingAvatar {
+width: 56px;
+height: 56px;}
+
+#speechBubble {
+font-size: 12px !important;
+padding: 4px 10px !important;
+max-width: 140px !important;
+}}
+</style>
+</head>
+<body>
+<div id="avatarWrapper">
+<img id="flyingAvatar" src="favicon.png" alt="冬">
+<div id="speechBubble">
+<span id="bubbleText">一几一几！</span>
+</div>
+</div>
+<div class="box">
+<h2>一几一几复读机</h2>
+<div class="subtitle">冬冬灵灵水</div>
+<div class="row">
+<label>
+<span>次数</span>
+<input type="number" id="countInput" min="1" max="9999" value="">
+</label>
+</div>
+<div class="btn-row">
+<button class="generate-btn" id="generateBtn">生成</button>
+<button class="copy-btn" id="copyBtn">复制</button>
+</div>
+<textarea id="outputArea" readonly placeholder="点击生成"></textarea>
+<div class="hint" id="hintInfo">一几一几一几一几</div>
+
+</div>
+<script>
+!function(){const e=document.getElementById("countInput"),t=document.getElementById("generateBtn"),n=document.getElementById("copyBtn"),o=document.getElementById("outputArea"),r=document.getElementById("hintInfo");function a(){const t=e.value.trim();if(""===t){o.value="",r.textContent="请输入次数";return}let n=parseInt(t,10);if(isNaN(n)||n<1){o.value="",r.textContent="请输入有效的正整数";return}n>9999&&(n=9999,e.value=n);const a="一几".repeat(n);o.value=a,r.textContent=`已生成 ${n} 次，共 ${a.length} 个字符`}function c(){const e=o.value;if(!e){r.textContent="没有内容可复制，请先生成";return}if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(e).then(()=>{r.textContent="已复制到剪贴板！",setTimeout(()=>{const e=Math.floor(o.value.length/2);r.textContent=`共 ${e} 次 · 已复制`},2e3)}).catch(()=>{s(e)});else s(e)}function s(t){o.select(),o.setSelectionRange(0,99999);try{document.execCommand("copy"),r.textContent="已复制到剪贴板！",setTimeout(()=>{const e=Math.floor(o.value.length/2);r.textContent=`共 ${e} 次 · 已复制`},2e3)}catch(e){r.textContent="复制失败，请手动选择复制"}o.blur()}t.addEventListener("click",function(e){e.preventDefault(),a()}),n.addEventListener("click",function(e){e.preventDefault(),c()}),e.addEventListener("input",function(){clearTimeout(window._timer),window._timer=setTimeout(a,200)}),window.addEventListener("load",function(){o.value="",r.textContent="请输入次数，点击生成"})}(),function(){const e=document.getElementById("speechBubble"),t=document.getElementById("bubbleText"),n=document.getElementById("flyingAvatar");if(!e||!t)return;const o=[
+"一几一几！",
+"冬冬灵灵水NB！",
+"再来一次！",
+"好无聊啊",
+"我瞅瞅你在干啥",
+"一几一几一几一几一几",
+"嘿嘿嘿",
+"今天天气不错",
+"你干什么呢？",
+"冬冬灵灵水祝你天天开心",
+"玩具狂奏曲终焉是神曲",
+"x x xxx",
+"哇，我是草履虫哎"
+];let r=null,a=!1;function c(){const n=Math.floor(Math.random()*o.length);t.textContent=o[n],e.style.opacity="1",a=!0,r&&clearTimeout(r),r=setTimeout(()=>{e.style.opacity="0",a=!1,s()},3e3)}function s(){const e=4e3+6e3*Math.random();r=setTimeout(()=>{c()},e)}window.addEventListener("load",function(){setTimeout(c,1500),s()}),n&&n.addEventListener("click",function(){a&&(e.style.opacity="0",r&&clearTimeout(r)),c()})}();
+</script>
+<script>
+!function(){
+const countInput=document.getElementById("countInput"),generateButton=document.getElementById("generateBtn");
+function updateCountParam(){
+const url=new URL(window.location.href),raw=countInput.value.trim(),count=parseInt(raw,10);
+if(raw&&Number.isFinite(count)&&count>0){url.searchParams.set("count",Math.min(count,9999))}
+else{url.searchParams.delete("count")}
+window.history.replaceState(null,"",url);
+}
+countInput.addEventListener("input",function(){
+clearTimeout(window._timer);
+updateCountParam();
+});
+generateButton.addEventListener("click",updateCountParam);
+window.addEventListener("load",function(){
+const value=new URLSearchParams(window.location.search).get("count");
+if(value===null)return;
+const count=parseInt(value,10);
+if(!/^\d+$/.test(value)||!Number.isFinite(count)||count<1){updateCountParam();return}
+countInput.value=Math.min(count,9999);
+updateCountParam();
+});
+}();
+</script>
+</body>
+</html>

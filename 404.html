@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>404 — 页面不见了 | Czealo States</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/_assets/style/common.css">
+<style>
+.e404{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  min-height:calc(100vh - 60px);
+  padding:48px 24px;
+  background:linear-gradient(180deg,#f4faff,#e6f2ff);}
+.e404 .code{
+  font-size:clamp(72px,22vw,110px);
+  line-height:1;
+  color:#2f9bff;
+  font-weight:700;
+  text-shadow:0 8px 32px rgba(47,155,255,.35);}
+.e404 h1{margin:18px 0 10px;color:#1b1b1b;}
+.e404 p{color:#5f6b7a;margin-bottom:32px;max-width:420px;}
+.e404 .actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;}
+.e404 .btn{
+  display:inline-block;
+  padding:12px 28px;
+  border-radius:999px;
+  text-decoration:none;
+  transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease;}
+.e404 .btn-primary{
+  background:linear-gradient(135deg,#4db3ff,#2f9bff);
+  color:#fff;
+  box-shadow:0 8px 20px rgba(47,155,255,.32);}
+.e404 .btn-primary:hover{background:#1f87e8;transform:translateY(-2px);}
+.e404 .btn-ghost{
+  border:1px solid #2f9bff;
+  background:transparent;
+  color:#2f9bff;}
+.e404 .btn-ghost:hover{background:#2f9bff;color:#fff;transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div class="e404">
+  <div class="code">404</div>
+  <h1>页面不见了</h1>
+  <p>你找的页面不存在，或者被站长弄丢了。<br>如果你确定它应该存在，那大概是它自己跑了。</p>
+  <div class="actions">
+    <a href="/" class="btn btn-primary">回首页</a>
+    <a href="/nav.html" class="btn btn-ghost">浏览所有选项</a>
+  </div>
+</div>
+
+<script src="/_assets/script/footer.js"></script>
+<script src="/_assets/navbar/nav.js"></script>
+</body>
+</html>

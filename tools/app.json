@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "title": "CZEncoder",
+      "desc": "加密工具，重要文件请勿使用",
+      "icon": "./c-zip-encoder/icon.svg",
+      "cover": "./c-zip-encoder/cover.svg",
+      "link": "./c-zip-encoder/index.html"
+    }
+  ]
+}

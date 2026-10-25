@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CZEncoder — bash</title>
+<link rel="icon" type="image/png" href="./favicon.png">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="style.css">
+<script src="/_assets/script/czencoder/czencoder.js"></script>
+</head>
+<body>
+<main class="terminal">
+<div class="term-out" id="termOut">
+<div class="line cmd" id="cmdLine"><span class="ps1" id="ps1">czealo@states:~$ </span><input id="cmdInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="终端命令输入"></div>
+</div>
+</main>
+<div class="hidden-layer" hidden>
+<input type="text" id="compressKey" value="">
+<input type="text" id="decompressKey" value="">
+<input type="text" id="textKey" value="">
+<input type="text" id="customFileName" value="">
+<input type="file" id="compressInput" multiple>
+<input type="file" id="decompressInput" accept=".cz">
+<div id="compressDropZone"><div id="compressFileList"><div class="empty">No files selected</div></div></div>
+<div id="decompressDropZone"><div id="decompressFileList"><div class="empty">No files selected</div></div></div>
+<div id="progressBar"></div>
+<div id="statusText"></div>
+<textarea id="textInput"></textarea>
+<textarea id="textOutput" readonly></textarea>
+<div id="textStatus"></div>
+<div id="langButtons"></div>
+</div>
+
+
+<script>
+  const SUPPORTED_LANGS={zh_Hans:{name:"简体中文"},zh_Hant:{name:"繁體中文"},en_US:{name:"English"},ja_JP:{name:"日本語"},ko_KR:{name:"한국어"},ru_RU:{name:"Русский"}},LANG_ORDER=["zh_Hans","zh_Hant","en_US","ja_JP","ko_KR","ru_RU"];let currentLang="en_US",langData=null;function getBrowserLang(){const e=navigator.languages||[navigator.language||"en-US"];for(const t of e){const e=t.replace("-","_");if(LANG_ORDER.includes(e))return e;for(const t of LANG_ORDER)if(e.startsWith(t.split("_")[0]))return t}return"en_US"}async function loadLanguage(e){if(!LANG_ORDER.includes(e)&&(e="en_US"),!langData)try{const t=await fetch("./lang.json"),n=await t.json();langData=n}catch(t){console.error("Failed to load language data:",t);try{const e=await fetch("./lang.json"),t=await e.json();langData=t}catch(e){console.error("Fallback load failed:",e);langData={en_US:{encryptTitle:"Encrypt Files",decryptTitle:"Decrypt Files",textTitle:"Text Encryption",keyPlaceholder:"Key (default if empty)",fileNamePlaceholder:"File name (auto if empty)",select:"Select",compress:"Encrypt",decompress:"Decrypt",emptyFileList:"No files selected",inputLabel:"Input",outputLabel:"Output",encode:"Encode",decode:"Decode",clear:"Clear",copy:"Copy",tipUpload:"Click or drag files here",sponsors:"Sponsors",support:"Support",tools:"Tools",confirmExternal:"Continue to afdian.com?",statusInputEmpty:"Please enter text first",statusEncodeSuccess:"Encode successful",statusEncodeFail:"Encode failed: ",statusDecodeInputEmpty:"Please enter encoded text first",statusDecodeSuccess:"Decode successful",statusDecodeFail:"Decode failed: ",statusClear:"Cleared",statusCopyEmpty:"Nothing to copy",statusCopySuccess:"Copied to clipboard",statusSelectArchive:"Only archive files allowed!",statusSelected:"Selected ",statusFiles:" files",statusSelectFirst:"Please select files first",statusPacking:"Packing...",statusNoFiles:"No files to encrypt",statusEncrypting:"Encrypting...",statusProcessing:"Processing...",statusComplete:"Complete: ",statusTo:" → ",statusSaved:" (saved ",statusPercent:"%)",statusEncryptFail:"Encrypt failed: ",statusReadError:"File read error: ",statusReading:"Reading...",statusInvalidFile:"Invalid file",statusUnsupportedVersion:"Unsupported version",statusWrongKey:"Wrong key!",statusFormatError:"Invalid .cz file",statusDecoding:"Decoding...",statusDecrypting:"Decrypting...",statusEmptyArchive:"Archive is empty",statusNoDecryptFiles:"No files to decrypt",statusDecrypted:"Decrypted: ",statusDecryptFail:"Decrypt failed: ",statusDecryptSingle:"Decrypted: "}}}}currentLang=e}function translate(e){if(!langData)return e;const t=e.split(".");let n=langData[currentLang];if(!n)n=langData.en_US;if(!n)return e;for(const e of t){if(n&&n[e]!==undefined)n=n[e];else return e}return n}function updateUI(){if(!langData)return;document.querySelectorAll("[data-i18n]").forEach(e=>{const n=e.dataset.i18n,o=translate(n);o&&(e.textContent=o)}),document.querySelectorAll("[data-i18n-placeholder]").forEach(e=>{const n=e.dataset.i18nPlaceholder,o=translate(n);o&&(e.placeholder=o)})}function switchLang(e){LANG_ORDER.includes(e)||(e="en_US"),loadLanguage(e).then(()=>{updateUI(),renderLangButtons(),localStorage.setItem("czealo_lang",e),"function"==typeof window.updateCompressFileList&&window.updateCompressFileList()})}function renderLangButtons(){const e=document.getElementById("langButtons");if(!e)return;let t='<select id="langSelect">';LANG_ORDER.forEach(n=>{const o=SUPPORTED_LANGS[n].name||n,o2=n===currentLang?"selected":"";t+=`<option value="${n}" ${o2}>${o}</option>`}),t+="</select>",e.innerHTML=t,document.getElementById("langSelect").addEventListener("change",function(){switchLang(this.value)})}async function initLanguage(){const e=localStorage.getItem("czealo_lang");let t=e||getBrowserLang();LANG_ORDER.includes(t)||(t="en_US"),await loadLanguage(t),updateUI(),renderLangButtons()}window.switchLang=switchLang,window.initLanguage=initLanguage,window.renderLangButtons=renderLangButtons;let compressFiles=[],decompressFile=null,isCompressing=!1,isDecompressing=!1;function getKeyStr(e){const t=document.getElementById(e).value.trim();return t||"default"}function setStatus(e,t){const n=document.getElementById("statusText");n.textContent=e,n.className="status"+(t?" "+t:"")}function setTextStatus(e,t){const n=document.getElementById("textStatus");n.textContent=e,n.className="text-status"+(t?" "+t:"")}function setProgress(e){document.getElementById("progressBar").style.width=Math.min(e,100)+"%"}function updateCompressFileList(){if(!langData)return;const e=document.getElementById("compressFileList");if(0===compressFiles.length){e.innerHTML='<div class="empty">'+translate("emptyFileList")+"</div>";return}let n="",o=0,r=20,i=compressFiles.slice(0,r);i.forEach(e=>{o+=e.size,n+=`<div class="item">${e.name} (${(e.size/1024).toFixed(1)} KB)</div>`}),compressFiles.length>r&&(o=compressFiles.reduce((e,t)=>e+t.size,0),n+=`<div class="item">... and ${compressFiles.length-r} more</div>`);const s=o>1048576?(o/1048576).toFixed(1)+" MB":(o/1024).toFixed(0)+" KB";n+=`<div style="color:#7a9a7a;font-size:10px;padding-top:2px;text-align:center;">${compressFiles.length} files · ${s}</div>`,e.innerHTML=n}window.updateCompressFileList=updateCompressFileList;function setupDragDrop() {
+  const compressZone = document.getElementById("compressDropZone");
+  const decompressZone = document.getElementById("decompressDropZone");
+  const compressInput = document.getElementById("compressInput");
+  const decompressInput = document.getElementById("decompressInput");
+
+  function setup(zone, input, isCompress) {
+    zone.addEventListener("click", function (event) {
+      if (event.target === zone || zone.contains(event.target)) input.click();
+    });
+    zone.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      zone.classList.add("dragover");
+    });
+    zone.addEventListener("dragleave", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      zone.classList.remove("dragover");
+    });
+    zone.addEventListener("drop", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      zone.classList.remove("dragover");
+
+      if (event.dataTransfer.items) {
+        if (isCompress) {
+          const names = new Set(compressFiles.map(file => file.name));
+          let added = 0;
+          for (let i = 0; i < event.dataTransfer.items.length; i++) {
+            const entry = event.dataTransfer.items[i].webkitGetAsEntry
+              && event.dataTransfer.items[i].webkitGetAsEntry();
+            if (entry && entry.isFile) {
+              const file = event.dataTransfer.items[i].getAsFile();
+              const name = entry.name || file.name || `file_${Date.now()}_${i}`;
+              if (!names.has(name)) {
+                compressFiles.push(new File([file], name, {type: file.type}));
+                names.add(name);
+                added++;
+              }
+            }
+          }
+          if (added > 0) {
+            updateCompressFileList();
+            const dt = new DataTransfer();
+            compressFiles.forEach(file => dt.items.add(file));
+            input.files = dt.files;
+            setStatus(translate("statusSelected") + compressFiles.length + translate("statusFiles"), "ok");
+          }
+        } else {
+          let file = null;
+          let name = "";
+          for (let i = 0; i < event.dataTransfer.items.length; i++) {
+            const entry = event.dataTransfer.items[i].webkitGetAsEntry
+              && event.dataTransfer.items[i].webkitGetAsEntry();
+            if (entry && entry.isFile) {
+              file = event.dataTransfer.items[i].getAsFile();
+              name = entry.name || file.name;
+              break;
+            }
+          }
+          if (!file) {
+            const files = Array.from(event.dataTransfer.files);
+            if (files.length === 0) return;
+            file = files[0];
+            name = file.name;
+          }
+
+          if (name.toLowerCase().endsWith(".cz")) {
+            decompressFile = file;
+            document.getElementById("decompressFileList").innerHTML =
+              `<div class="item">${name} (${(file.size / 1024).toFixed(1)} KB)</div>`;
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            setStatus("File selected: " + name, "ok");
+          } else {
+            setStatus("Please select a .cz file", "err");
+          }
+        }
+      }
+    });
+  }
+
+  document.addEventListener("dragover", event => event.preventDefault());
+  document.addEventListener("drop", event => event.preventDefault());
+  setup(compressZone, compressInput, true);
+  setup(decompressZone, decompressInput, false);
+}
+async function doTextEncode(){const e=document.getElementById("textInput").value;if(!e)return void setTextStatus(translate("statusInputEmpty"),"err");const n=getKeyStr("textKey");try{const t=await new CZEncoder(n).encode(e);document.getElementById("textOutput").value=t,setTextStatus(translate("statusEncodeSuccess"),"ok")}catch(e){e.message==="WRONG_KEY"?setTextStatus(translate("statusWrongKey"),"err"):setTextStatus(translate("statusEncodeFail")+e.message,"err")}}async function doTextDecode(){const e=document.getElementById("textInput").value;if(!e)return void setTextStatus(translate("statusDecodeInputEmpty"),"err");const n=getKeyStr("textKey");try{const t=await new CZEncoder(n).decode(e);document.getElementById("textOutput").value=t,setTextStatus(translate("statusDecodeSuccess"),"ok")}catch(e){e.message==="WRONG_KEY"?setTextStatus(translate("statusWrongKey"),"err"):e.message==="FORMAT_ERROR"?setTextStatus(translate("statusFormatError"),"err"):setTextStatus(translate("statusDecodeFail")+e.message,"err")}}function doTextClear(){document.getElementById("textInput").value="",document.getElementById("textOutput").value="",setTextStatus(translate("statusClear"),"ok")}function doTextCopy(){const e=document.getElementById("textOutput");e.value?(e.select(),navigator.clipboard?.writeText(e.value).then(()=>{setTextStatus(translate("statusCopySuccess"),"ok")}).catch(()=>{document.execCommand("copy"),setTextStatus(translate("statusCopySuccess"),"ok")})):setTextStatus(translate("statusCopyEmpty"),"err")}
+
+async function doCompress(){
+  if(isCompressing)return void setStatus("Already compressing, please wait...","err");
+  if(0===compressFiles.length)return void setStatus(translate("statusSelectFirst"),"err");
+
+  const MAX_FILE_SIZE = 100 * 1024 * 1024;
+  const MAX_FILE_COUNT = 200;
+  if (compressFiles.length > MAX_FILE_COUNT) {
+    return void setStatus("文件数量过多（" + compressFiles.length + " 个），请分批加密（最多 " + MAX_FILE_COUNT + " 个）","err");
+  }
+  const bigFile = compressFiles.find(f => f.size > MAX_FILE_SIZE);
+  if (bigFile) {
+    return void setStatus("文件过大：" + bigFile.name + "（" + (bigFile.size/1024/1024).toFixed(1) + "MB），单个文件请控制在 100MB 以内","err");
+  }
+
+  isCompressing=!0;
+  let e=document.getElementById("customFileName").value.trim();
+  if(""===e){const t=new Date,n=e=>String(e).padStart(2,"0");e=t.getFullYear()+"-"+n(t.getMonth()+1)+"-"+n(t.getDate())+"_"+n(t.getHours())+"-"+n(t.getMinutes())+"-"+n(t.getSeconds())}
+  e=e.replace(/[^a-zA-Z0-9_\u4e00-\u9fa5\-]/g,"");
+  const n=getKeyStr("compressKey");
+  setStatus(translate("statusPacking"),""),setProgress(10);
+  const o=new JSZip,r=compressFiles.slice();
+  r.forEach(e=>{o.file(e.name,e)});
+  try{
+    setProgress(30),setStatus(translate("statusEncrypting"),"");
+    const i = await Promise.race([
+      o.generateAsync({
+        type: "uint8array",
+        onprogress: function(ev) {
+          const percent = (ev && typeof ev.percent === "number" && !isNaN(ev.percent)) ? ev.percent : 0;
+          const t = 30 + Math.round(35 * percent);
+          setProgress(t);
+          setStatus(translate("statusPacking") + " " + Math.round(percent) + "%", "");
+        }
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("打包超时，文件可能过大或过多，请分批处理")), 120000)
+      )
+    ]);
+    setProgress(65),setStatus(translate("statusProcessing"),"");
+    const s=new CZEncoder(n),a=await s.encodeBytes(i);
+    setProgress(90);
+    const h=e+".cz",l=new Blob([a],{type:"application/octet-stream"}),c=URL.createObjectURL(l),u=document.createElement("a");
+    u.href=c,u.download=h,document.body.appendChild(u),u.click(),document.body.removeChild(u),setTimeout(()=>URL.revokeObjectURL(c),5e3),setProgress(100);
+    const d=r.reduce((e,t)=>e+t.size,0),p=((1-a.length/d)*100).toFixed(1);
+    setStatus(translate("statusComplete")+r.length+translate("statusFiles")+translate("statusTo")+h+translate("statusSaved")+p+translate("statusPercent"),"ok"),compressFiles=[],document.getElementById("compressInput").value="",updateCompressFileList()
+  }catch(e){
+    e.message==="WRONG_KEY"?setStatus(translate("statusWrongKey"),"err"):e.message==="FORMAT_ERROR"?setStatus(translate("statusFormatError"),"err"):setStatus(translate("statusEncryptFail")+e.message,"err"),console.error(e)
+  }finally{
+    isCompressing=!1
+  }
+}
+
+async function doDecompress(){if(isDecompressing)return void setStatus("Already decrypting, please wait...","err");if(!decompressFile)return void setStatus(translate("statusSelectFirst"),"err");isDecompressing=!0;const e=getKeyStr("decompressKey");setStatus(translate("statusReading"),""),setProgress(10);try{const n=new Uint8Array(await decompressFile.arrayBuffer());setProgress(30),setStatus(translate("statusDecoding"),"");const o=new CZEncoder(e);let r;try{r=await o.decodeBytes(n)}catch(e){return e.message==="WRONG_KEY"?setStatus(translate("statusWrongKey"),"err"):e.message==="FORMAT_ERROR"?setStatus(translate("statusFormatError"),"err"):setStatus(translate("statusDecryptFail")+e.message,"err"),isDecompressing=!1,void 0}setProgress(50),setStatus(translate("statusDecrypting"),"");let i;try{i=await JSZip.loadAsync(r)}catch(e){return setStatus(translate("statusFormatError"),"err"),isDecompressing=!1,void 0}const s=Object.keys(i.files);if(0===s.length)return setStatus(translate("statusEmptyArchive"),"err"),isDecompressing=!1,void 0;setProgress(70);const a=[];s.forEach(e=>{const t=i.files[e];t.dir||a.push(t.async("blob").then(t=>({name:e,content:t})))});const h=await Promise.all(a);if(setProgress(85),0===h.length)return setStatus(translate("statusNoDecryptFiles"),"err"),cleanupDecompressState(),isDecompressing=!1,void 0;if(h.length>1){const e=new JSZip;h.forEach(t=>{e.file(t.name,t.content)});const t=await e.generateAsync({type:"blob"}),n=decompressFile.name.replace(/\.cz$/i,"")||"decrypted",o=URL.createObjectURL(t),r=document.createElement("a");r.href=o,r.download=n+"_decrypted.zip",document.body.appendChild(r),r.click(),document.body.removeChild(r),setTimeout(()=>URL.revokeObjectURL(o),5e3),setProgress(100),setStatus(translate("statusDecrypted")+h.length+translate("statusFiles")+" -> "+n+"_decrypted.zip","ok")}else{const e=h[0],t=new Blob([e.content],{type:"application/octet-stream"}),n=URL.createObjectURL(t),o=document.createElement("a");o.href=n,o.download=e.name,document.body.appendChild(o),o.click(),document.body.removeChild(o),setTimeout(()=>URL.revokeObjectURL(n),3e3),setProgress(100),setStatus(translate("statusDecryptSingle")+e.name,"ok")}cleanupDecompressState()}catch(e){e.message==="WRONG_KEY"?setStatus(translate("statusWrongKey"),"err"):e.message==="FORMAT_ERROR"?setStatus(translate("statusFormatError"),"err"):setStatus(translate("statusDecryptFail")+e.message,"err"),console.error(e),cleanupDecompressState()}finally{isDecompressing=!1}}function cleanupDecompressState(){decompressFile=null;const e=document.getElementById("decompressInput");e&&(e.value="");const t=document.getElementById("decompressFileList");if(t){if(langData){t.innerHTML='<div class="empty">'+translate("emptyFileList")+"</div>"}else{t.innerHTML='<div class="empty">No files selected</div>'}}}document.addEventListener("DOMContentLoaded",async function(){await initLanguage(),setupDragDrop(),updateCompressFileList();const e=document.getElementById("compressInput"),t=document.getElementById("decompressInput");e.addEventListener("change",function(){const e=Array.from(this.files);if(e.length){const t=new Set(compressFiles.map(e=>e.name));let n=0;e.forEach(e=>{t.has(e.name)||(compressFiles.push(e),t.add(e.name),n++)}),n>0&&(updateCompressFileList(),setStatus(translate("statusSelected")+compressFiles.length+translate("statusFiles"),"ok")),this.value=""}}),t.addEventListener("change",function(){if(this.files.length){const e=this.files[0];if(e.name.toLowerCase().endsWith(".cz")){decompressFile=e,document.getElementById("decompressFileList").innerHTML=`<div class="item">${e.name} (${(e.size/1024).toFixed(1)} KB)</div>`,setStatus("File selected: "+e.name,"ok")}else setStatus("Please select a .cz file","err");this.value=""}});const n=document.createElement("label");n.setAttribute("for","compressInput"),n.style.display="none",document.body.appendChild(n);const o=document.createElement("label");o.setAttribute("for","decompressInput"),o.style.display="none",document.body.appendChild(o)});
+</script>
+<script src="terminal.js"></script>
+</body>
+</html>
